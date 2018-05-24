@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+
+require 'logger'
+require 'optparse'
+
+require 'aws/ses'
+
+logger = Logger.new('log/email.log')
+options = OpenStruct.new
+
+option_parser = OptionParser.new do |opts|
+  opts.on('-r', '--recipients FILE', 'File with email addresses, one per line') do |file|
+    options.recipients = File.read(file).each_line.map(&:strip)
+  end
+
+  opts.on('-e', '--email FILE', 'Email to send (HTML)') do |file|
+    options.email = File.read(file)
+  end
+
+  opts.on('-s', '--subject SUBJECT', 'Email subject') do |subject|
+    options.subject = subject
+  end
+end
+
+option_parser.parse(ARGV)
+
+ses = AWS::SES::Base.new(
+  access_key_id: ENV.fetch('AWS_ACCESS_KEY_ID'),
+  secret_access_key: ENV.fetch('AWS_SECRET_ACCESS_KEY'),
+  server: 'email.eu-west-1.amazonaws.com'
+)
+
+options.recipients.each do |recipient|
+  ses.send_email(
+    to: recipient,
+    source: 'ad2games GmbH <info@ad2games.com>',
+    subject: options.subject,
+    html_body: options.email
+  )
+  logger.info("Email to #{recipient} sent")
+end
