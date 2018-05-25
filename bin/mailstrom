@@ -4,6 +4,9 @@ require 'logger'
 require 'optparse'
 
 require 'aws/ses'
+require 'thread/pool'
+
+THREAD_POOL_SIZE = 4
 
 logger = Logger.new('log/email.log')
 options = OpenStruct.new
@@ -30,12 +33,21 @@ ses = AWS::SES::Base.new(
   server: 'email.eu-west-1.amazonaws.com'
 )
 
+pool = Thread.pool(THREAD_POOL_SIZE)
+
 options.recipients.each do |recipient|
-  ses.send_email(
-    to: recipient,
-    source: 'ad2games GmbH <info@ad2games.com>',
-    subject: options.subject,
-    html_body: options.email
-  )
-  logger.info("Email to #{recipient} sent")
+  pool.process do
+    ses.send_email(
+      to: recipient,
+      source: 'ad2games GmbH <info@ad2games.com>',
+      subject: options.subject,
+      html_body: options.email
+    )
+    logger.info("Email to #{recipient} sent")
+  rescue InvalidParameterValue => e
+    logger.error("Email to #{recipient} not sent: #{e.message}")
+  end
 end
+
+print 'Press any key when done.'
+$stdin.gets
