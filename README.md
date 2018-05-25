@@ -20,6 +20,8 @@ by Google, which can be mitigated by adding your domain at
 AWS will put you on probation if there is a certain share of bounces. From the email we got:
 > We expect our senders' bounce rates to remain below 5%. Senders with a bounce rate exceeding 10% risk suspension.
 
+E-mail responsibly!
+
 ## TODOs
 
 * Validate the command line arguments
