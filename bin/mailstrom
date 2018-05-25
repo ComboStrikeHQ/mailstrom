@@ -23,6 +23,10 @@ option_parser = OptionParser.new do |opts|
   opts.on('-s', '--subject SUBJECT', 'Email subject') do |subject|
     options.subject = subject
   end
+
+  opts.on('-f', '--from EMAIL_ADDRESS', "The email's sender address") do |email|
+    options.from = email
+  end
 end
 
 option_parser.parse(ARGV)
@@ -39,7 +43,7 @@ options.recipients.each do |recipient|
   pool.process do
     ses.send_email(
       to: recipient,
-      source: 'ad2games GmbH <info@ad2games.com>',
+      source: options.from,
       subject: options.subject,
       html_body: options.email
     )
