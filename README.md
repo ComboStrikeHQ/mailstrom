@@ -25,3 +25,4 @@ E-mail responsibly!
 ## TODOs
 
 * Validate the command line arguments
+* Figure out what a good `THREAD_POOL_SIZE` is
